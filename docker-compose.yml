@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:13
+    image: postgres:14
     environment:
       - POSTGRES_DB=stockchecker
       - POSTGRES_USER=postgres
