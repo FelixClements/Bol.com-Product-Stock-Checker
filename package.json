@@ -1,0 +1,19 @@
+{
+  "name": "stock-checker",
+  "version": "1.0.0",
+  "description": "Stock checker for bol.com products",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "debug": "node --inspect-brk src/app.js"
+  },
+  "author": "Maart",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^24.4.0",
+    "winston": "^3.17.0",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1"
+  }
+}
