@@ -95,7 +95,4 @@ logs/*
 !logs/.gitkeep
 
 # ai-digest
-.aidigestignore
-
-# ai-digest
 codebase.md

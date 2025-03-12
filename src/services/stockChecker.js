@@ -1,14 +1,6 @@
 import puppeteer from 'puppeteer';
-import winston from 'winston';
-
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' }),
-  ],
-});
+import { handleStockCheckerError } from './utils/errorHandler.js';
+import { STOCK_CHECKER_STEPS } from './constants/stockCheckerSteps.js';
 
 export async function checkStock(url) {
   let browser;
@@ -26,71 +18,117 @@ export async function checkStock(url) {
 
     // Handle cookie consent
     try {
-      await page.waitForSelector('#js-first-screen-accept-all-button', { visible: true });
-      await page.click('#js-first-screen-accept-all-button');
+      await page.waitForSelector(STOCK_CHECKER_STEPS.COOKIE_CONSENT.selector, { 
+        visible: true,
+        timeout: STOCK_CHECKER_STEPS.COOKIE_CONSENT.timeout 
+      });
+      await page.click(STOCK_CHECKER_STEPS.COOKIE_CONSENT.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
-      logger.info('Cookie consent modal not found or already handled');
-      throw error;
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.COOKIE_CONSENT.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}`
+      );
     }
 
     // Handle country/language modal
     try {
-      await page.waitForSelector('#modalWindow > div.modal__window.js_modal_window > button', { visible: true });
-      await page.locator('#modalWindow > div.modal__window.js_modal_window > button').click();
+      await page.waitForSelector(STOCK_CHECKER_STEPS.COUNTRY_MODAL.selector, { 
+        visible: true,
+        timeout: STOCK_CHECKER_STEPS.COUNTRY_MODAL.timeout 
+      });
+      await page.click(STOCK_CHECKER_STEPS.COUNTRY_MODAL.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
-      logger.info('Country/language modal not found or already handled');
-      throw error;
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.COUNTRY_MODAL.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.COUNTRY_MODAL.description}`
+      );
     }
 
-    // add to cart
+    // Add to cart
     try {
-      await page.locator('xpath//html/body/div[1]/main/div/div[1]/div[2]/div[2]/section[1]/div[2]/div[1]/span/a').click();
-      await new Promise(resolve => setTimeout(resolve, 1000));     
-    } catch (error) {
-      logger.error('Error adding product to cart:', error);
-      throw error;
-    }
-
-    // button to got to cart
-    try {
-      await page.locator('xpath//html/body/div[3]/div[2]/div[3]/div[1]/div/div[2]/a').click();
+      await page.waitForSelector(STOCK_CHECKER_STEPS.ADD_TO_CART.selector, {
+        timeout: STOCK_CHECKER_STEPS.ADD_TO_CART.timeout
+      });
+      await page.click(STOCK_CHECKER_STEPS.ADD_TO_CART.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
-      logger.error('Error going to cart:', error);
-      throw error;
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.ADD_TO_CART.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.ADD_TO_CART.description}`
+      );
     }
 
-    // selecting the meer option
+    // Go to cart
     try {
-      await page.waitForSelector('xpath//html/body/div/main/wsp-basket-application/div[2]/div[1]/div/div[5]/div[1]/div/div/select');
-      await page.select('select', 'Meer');
+      await page.waitForSelector(STOCK_CHECKER_STEPS.GO_TO_CART.selector, {
+        timeout: STOCK_CHECKER_STEPS.GO_TO_CART.timeout
+      });
+      await page.click(STOCK_CHECKER_STEPS.GO_TO_CART.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
-      logger.error('Error selecting the meer option:', error);
-      throw error;
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.GO_TO_CART.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.GO_TO_CART.description}`
+      );
     }
 
-    // change the quantity
+    // Select meer option
     try {
-      await page.locator('xpath//html/body/div/main/wsp-basket-application/div[2]/div[1]/div/div[5]/div[1]/div/div[1]/input').fill('500');
+      await page.waitForSelector(STOCK_CHECKER_STEPS.SELECT_MEER_OPTION.selector, {
+        timeout: STOCK_CHECKER_STEPS.SELECT_MEER_OPTION.timeout
+      });
+      await page.select(STOCK_CHECKER_STEPS.SELECT_MEER_OPTION.selector, 'Meer');
       await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (error) {
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.SELECT_MEER_OPTION.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.SELECT_MEER_OPTION.description}`
+      );
+    }
+
+    // Change quantity
+    try {
+      await page.waitForSelector(STOCK_CHECKER_STEPS.CHANGE_QUANTITY.selector, {
+        timeout: STOCK_CHECKER_STEPS.CHANGE_QUANTITY.timeout
+      });
+      await page.type(STOCK_CHECKER_STEPS.CHANGE_QUANTITY.selector, STOCK_CHECKER_STEPS.CHANGE_QUANTITY.quantity);
       await page.keyboard.press('Enter');
       await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) { 
-      logger.error('Error changing the quantity:', error);
-      throw error;
+    } catch (error) {
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.CHANGE_QUANTITY.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.CHANGE_QUANTITY.description}`
+      );
     }
 
-    // get the stock value
+    // Get stock value
     try {
-      const product_stock = await page.waitForSelector('xpath//html/body/div/main/wsp-basket-application/div[2]/div[2]/div/div[1]/div[1]/span');
-      const stock_value = await product_stock?.evaluate(el => el.getAttribute('data-amount'));
-      return parseInt(stock_value, 10);
+      const productStock = await page.waitForSelector(STOCK_CHECKER_STEPS.GET_STOCK_VALUE.selector, {
+        timeout: STOCK_CHECKER_STEPS.GET_STOCK_VALUE.timeout
+      });
+      const stockValue = await productStock?.evaluate(el => el.getAttribute('data-amount'));
+      return parseInt(stockValue, 10);
     } catch (error) {
-      logger.error('Error checking stock:', error);
-      throw error;
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.GET_STOCK_VALUE.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.GET_STOCK_VALUE.description}`
+      );
     }
 
   } finally {
