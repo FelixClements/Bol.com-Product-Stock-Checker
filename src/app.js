@@ -2,16 +2,7 @@
 
 import { checkStock } from './services/stockChecker.js';
 import { Product } from './models/products.js';
-import winston from 'winston';
-
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.File({ filename: '/logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: '/logs/combined.log' }),
-  ],
-});
+import { logger } from './utils/logger.js';
 
 async function updateProductStock() {
   try {
@@ -22,11 +13,11 @@ async function updateProductStock() {
       try {
         const stock = await checkStock(product.url);
         
-        // Update last_checked timestamp
-        await Product.updateLastChecked(product.id);
-
         // Insert into history table
         await Product.addStockHistory(product.id, stock);
+        
+        // Update last_checked timestamp
+        await Product.updateLastChecked(product.id);
 
         logger.info(`Updated stock for product ${product.id}: ${stock}`);
       } catch (error) {
