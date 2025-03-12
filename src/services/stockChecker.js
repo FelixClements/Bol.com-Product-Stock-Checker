@@ -24,7 +24,6 @@ export async function checkStock(url) {
       });
       await page.click(STOCK_CHECKER_STEPS.COOKIE_CONSENT.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await page.screenshot({ path: `${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}_1.png` });
     } catch (error) {
       await handleStockCheckerError(
         page, 
@@ -42,7 +41,6 @@ export async function checkStock(url) {
       });
       await page.click(STOCK_CHECKER_STEPS.COUNTRY_MODAL.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await page.screenshot({ path: `${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}_2.png` });
     } catch (error) {
       await handleStockCheckerError(
         page, 
@@ -59,7 +57,6 @@ export async function checkStock(url) {
       });
       await page.click(STOCK_CHECKER_STEPS.ADD_TO_CART.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await page.screenshot({ path: `${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}_3.png` });
     } catch (error) {
       await handleStockCheckerError(
         page, 
@@ -76,7 +73,6 @@ export async function checkStock(url) {
       });
       await page.click(STOCK_CHECKER_STEPS.GO_TO_CART.selector);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await page.screenshot({ path: `${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}_4.png` });
     } catch (error) {
       await handleStockCheckerError(
         page, 
@@ -93,7 +89,6 @@ export async function checkStock(url) {
       });
       await page.select(STOCK_CHECKER_STEPS.SELECT_MEER_OPTION.selector, 'Meer');
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await page.screenshot({ path: `${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}_5.png` });
     } catch (error) {
       await handleStockCheckerError(
         page, 
@@ -111,7 +106,6 @@ export async function checkStock(url) {
       await page.locator(STOCK_CHECKER_STEPS.CHANGE_QUANTITY.selector).fill(STOCK_CHECKER_STEPS.CHANGE_QUANTITY.quantity);
       await page.keyboard.press('Enter');
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await page.screenshot({ path: `${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}_6.png` });
     } catch (error) {
       await handleStockCheckerError(
         page, 
@@ -127,7 +121,6 @@ export async function checkStock(url) {
         timeout: STOCK_CHECKER_STEPS.GET_STOCK_VALUE.timeout
       });
       const stockValue = await productStock?.evaluate(el => el.getAttribute('data-amount'));
-      await page.screenshot({ path: `${STOCK_CHECKER_STEPS.COOKIE_CONSENT.description}_7.png` });
       return parseInt(stockValue, 10);
     } catch (error) {
       await handleStockCheckerError(
