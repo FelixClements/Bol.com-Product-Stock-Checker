@@ -1,37 +1,35 @@
 // src/app.js
-
-import { checkStock } from './services/stockChecker.js';
-import { Product } from './models/products.js';
+import { Scheduler } from './services/scheduler.js';
 import { logger } from './utils/logger.js';
+import dotenv from 'dotenv';
 
-async function updateProductStock() {
-  try {
-    // Get all products that need checking
-    const products = await Product.getAllPendingChecks();
+// Load environment variables
+dotenv.config();
 
-    for (const product of products) {
-      try {
-        const stock = await checkStock(product.url);
-        
-        // Insert into history table
-        await Product.addStockHistory(product.id, stock);
-        
-        // Update last_checked timestamp
-        await Product.updateLastChecked(product.id);
+// Log environment
+logger.info(`Running in ${process.env.NODE_ENV || 'development'} environment`);
 
-        logger.info(`Updated stock for product ${product.id}: ${stock}`);
-      } catch (error) {
-        logger.error(`Error checking stock for product ${product.id}:`, error);
-      }
-    }
-  } catch (error) {
-    logger.error('Database error:', error);
-    throw error;
-  }
-}
+// Create and start the scheduler
+const scheduler = new Scheduler();
 
-// Run the stock checker
-updateProductStock().catch(error => {
-  logger.error('Application error:', error);
-  process.exit(1);
+// Start the scheduler
+scheduler.start()
+  .catch(error => {
+    logger.error('Failed to start scheduler:', error);
+    process.exit(1);
+  });
+
+// Handle application shutdown
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  scheduler.stop();
+  process.exit(0);
 });
+
+process.on('SIGINT', async () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  scheduler.stop();
+  process.exit(0);
+});
+
+logger.info('Stock checker application started');
