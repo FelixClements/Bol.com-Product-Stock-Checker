@@ -16,6 +16,7 @@ export const STOCK_CHECKER_STEPS = {
     ADD_TO_CART: {
       id: 'add_to_cart',
       selector: 'xpath//html/body/div[1]/main/div/div[1]/div[2]/div[2]/section[1]/div[2]/div[1]/span/a',
+      selector2: 'xpath//html/body/div[1]/main/div/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/span/a',
       description: 'add to product to cart',
       timeout: 5000
     },

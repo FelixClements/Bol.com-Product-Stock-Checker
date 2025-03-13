@@ -52,20 +52,31 @@ export async function checkStock(url) {
 
     // Add to cart
     try {
-      await page.waitForSelector(STOCK_CHECKER_STEPS.ADD_TO_CART.selector, {
-        timeout: STOCK_CHECKER_STEPS.ADD_TO_CART.timeout
-      });
-      await page.click(STOCK_CHECKER_STEPS.ADD_TO_CART.selector);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
-      await handleStockCheckerError(
-        page, 
-        STOCK_CHECKER_STEPS.ADD_TO_CART.id,
-        error, 
-        `Failed to ${STOCK_CHECKER_STEPS.ADD_TO_CART.description}`
-      );
+      // Try the first selector
+      const firstSelector = STOCK_CHECKER_STEPS.ADD_TO_CART.selector;
+      await page.waitForSelector(firstSelector, { timeout: STOCK_CHECKER_STEPS.ADD_TO_CART.timeout });
+      await page.click(firstSelector);
+    } catch (firstSelectorError) {
+      console.warn("First selector failed, trying fallback...", firstSelectorError.message);
+      try {
+        // Try the fallback selector
+        const fallbackSelector = STOCK_CHECKER_STEPS.ADD_TO_CART.selector2;
+        await page.waitForSelector(fallbackSelector, { timeout: STOCK_CHECKER_STEPS.ADD_TO_CART.timeout });
+        await page.click(fallbackSelector);
+      } catch (fallbackSelectorError) {
+        // Both failed, handle final failure here
+        await handleStockCheckerError(
+          page, 
+          STOCK_CHECKER_STEPS.ADD_TO_CART.id,
+          fallbackSelectorError, 
+          `Failed to ${STOCK_CHECKER_STEPS.ADD_TO_CART.description} with both selectors`
+        );
+      }
     }
 
+    // Wait after clicking
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     // Go to cart
     try {
       await page.waitForSelector(STOCK_CHECKER_STEPS.GO_TO_CART.selector, {
