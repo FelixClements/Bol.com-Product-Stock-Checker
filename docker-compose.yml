@@ -10,9 +10,9 @@ services:
       - DB_NAME=stockchecker
       - DB_USER=postgres
       - DB_PASSWORD=yourpassword
-      - API_PORT=3000  # Add this line
+      - API_PORT=3000
     ports:
-      - "3000:3000"  # Add this line
+      - "3000:3000"
     depends_on:
       - db
     restart: unless-stopped
