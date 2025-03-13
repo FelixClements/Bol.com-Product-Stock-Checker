@@ -61,6 +61,25 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    
+    const result = await Product.deleteProduct(productId);
+    
+    if (!result) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    logger.info(`Deleted product with ID: ${productId}`);
+    return res.json({ message: 'Product deleted successfully' });
+    
+  } catch (error) {
+    logger.error('Error deleting product:', error);
+    return res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
 // Start the server
 export function startApiServer() {
   return new Promise((resolve) => {

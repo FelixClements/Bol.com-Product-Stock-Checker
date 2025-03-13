@@ -126,4 +126,37 @@ export class Product {
     const { rows } = await pool.query(query, [productId]);
     return rows;
   }
+
+  static async deleteProduct(productId) {
+    try {
+        // Start a transaction
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Delete related records from products_history first
+            await client.query(
+                'DELETE FROM products_history WHERE product_id = $1',
+                [productId]
+            );
+
+            // Then delete the product
+            const result = await client.query(
+                'DELETE FROM products WHERE id = $1 RETURNING id',
+                [productId]
+            );
+
+            await client.query('COMMIT');
+            
+            return result.rows.length > 0;
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        throw new Error(`Failed to delete product: ${error.message}`);
+    }
+}
 }
