@@ -85,7 +85,19 @@
         button:hover {
             background-color: #2980b9;
         }
-        
+
+        .remove-btn {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            background-color: #c0392b;
+        }
         .alert {
             padding: 10px 15px;
             margin-bottom: 15px;
@@ -325,19 +337,49 @@
                 let tableHtml = '';
                 
                 products.forEach(product => {
-                    tableHtml += `
-                        <tr>
-                            <td>${product.id}</td>
-                            <td class="truncate" title="${product.url}">${product.url}</td>
-                            <td>${product.scheduled_time || 'Not scheduled'}</td>
-                        </tr>
-                    `;
-                });
+                tableHtml += `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td class="truncate" title="${product.url}">${product.url}</td>
+                        <td>${product.scheduled_time || 'Not scheduled'}</td>
+                        <td>
+                            <button 
+                                class="remove-btn" 
+                                data-product-id="${product.id}"
+                                onclick="removeProduct(${product.id})"
+                            >Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
                 
                 productsBody.innerHTML = tableHtml;
                 
             } catch (error) {
                 productsBody.innerHTML = `<tr><td colspan="3">Error loading products: ${error.message}</td></tr>`;
+                console.error('Error:', error);
+            }
+        }
+
+        async function removeProduct(productId) {
+            if (!confirm('Are you sure you want to remove this product?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to remove product');
+                }
+
+                showAlert(successAlert, 'Product removed successfully!');
+                fetchProducts(); // Refresh the list
+            } catch (error) {
+                showAlert(errorAlert, error.message || 'Error removing product');
                 console.error('Error:', error);
             }
         }
