@@ -1,21 +1,21 @@
 version: '3.8'
 
 services:
-  stock-checker:
-    build: .
-    environment:
-      - NODE_ENV=production
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_NAME=stockchecker
-      - DB_USER=postgres
-      - DB_PASSWORD=yourpassword
-      - API_PORT=3000
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
-    restart: unless-stopped
+  product_stock_checker:
+      image: ghcr.io/felixclements/product_stock_checker_js:main
+      environment:
+        - NODE_ENV=production
+        - DB_HOST=db
+        - DB_PORT=5432
+        - DB_NAME=stockchecker
+        - DB_USER=postgres
+        - DB_PASSWORD=yourpassword
+        - API_PORT=3000
+      ports:
+        - "3000:3000"
+      depends_on:
+        - db
+      restart: unless-stopped
 
   db:
     image: postgres:14
