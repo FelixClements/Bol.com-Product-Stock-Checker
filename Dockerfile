@@ -22,7 +22,14 @@ RUN npm ci --only=production
 # Copy source
 COPY . .
 
-# Create volume for logs and screenshots
+# Set up log forwarding in production only
+RUN if [ "$NODE_ENV" = "production" ]; then \
+        mkdir -p /usr/src/app/logs && \
+        ln -sf /dev/stdout /usr/src/app/logs/combined.log && \
+        ln -sf /dev/stderr /usr/src/app/logs/error.log; \
+    fi
+
+# Create volume for logs and screenshots (only used in development)
 VOLUME ["/usr/src/app/logs"]
 
 # Set non-root user

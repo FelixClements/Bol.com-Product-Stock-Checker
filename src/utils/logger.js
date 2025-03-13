@@ -1,5 +1,4 @@
 // src/utils/logger.js
-
 import winston from 'winston';
 import path from 'path';
 import fs from 'fs';
@@ -18,13 +17,24 @@ class LoggerManager {
   }
 
   initializeLogger() {
-    this.logger = winston.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
-      transports: [
+    const isProd = process.env.NODE_ENV === 'production';
+    
+    const transports = [];
+    
+    if (isProd) {
+      // In production, forward logs to stdout/stderr
+      transports.push(
+        new winston.transports.Console({
+          level: 'info',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json()
+          )
+        })
+      );
+    } else {
+      // In development, write to files
+      transports.push(
         new winston.transports.File({ 
           filename: path.join(this.logsDir, 'error.log'), 
           level: 'error' 
@@ -32,15 +42,20 @@ class LoggerManager {
         new winston.transports.File({ 
           filename: path.join(this.logsDir, 'combined.log')
         }),
-      ],
-    });
-
-    // Add console logging in development
-    if (process.env.NODE_ENV !== 'production') {
-      this.logger.add(new winston.transports.Console({
-        format: winston.format.simple()
-      }));
+        new winston.transports.Console({
+          format: winston.format.simple()
+        })
+      );
     }
+
+    this.logger = winston.createLogger({
+      level: 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
+      transports
+    });
   }
 }
 
