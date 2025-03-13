@@ -184,6 +184,20 @@
                 max-width: 200px;
             }
         }
+
+        .truncate a {
+            color: var(--primary);
+            text-decoration: none;
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .truncate a:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -337,21 +351,25 @@
                 let tableHtml = '';
                 
                 products.forEach(product => {
-                tableHtml += `
-                    <tr>
-                        <td>${product.id}</td>
-                        <td class="truncate" title="${product.url}">${product.url}</td>
-                        <td>${product.scheduled_time || 'Not scheduled'}</td>
-                        <td>
-                            <button 
-                                class="remove-btn" 
-                                data-product-id="${product.id}"
-                                onclick="removeProduct(${product.id})"
-                            >Remove</button>
-                        </td>
-                    </tr>
-                `;
-            });
+                    tableHtml += `
+                        <tr>
+                            <td>${product.id}</td>
+                            <td class="truncate" title="${product.url}">
+                                <a href="${product.url}" target="_blank" rel="noopener noreferrer">
+                                    ${product.url}
+                                </a>
+                            </td>
+                            <td>${product.scheduled_time || 'Not scheduled'}</td>
+                            <td>
+                                <button 
+                                    class="remove-btn" 
+                                    data-product-id="${product.id}"
+                                    onclick="removeProduct(${product.id})"
+                                >Remove</button>
+                            </td>
+                        </tr>
+                    `;
+                });
                 
                 productsBody.innerHTML = tableHtml;
                 
