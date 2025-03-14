@@ -61,10 +61,15 @@ app.post('/api/products', async (req, res) => {
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.getAllProducts();
-    return res.json(products);
+    // Return an empty array instead of potentially undefined
+    return res.json(products || []);
   } catch (error) {
     logger.error('Error fetching products:', error);
-    return res.status(500).json({ error: 'Failed to fetch products' });
+    // Return a more specific error message
+    return res.status(500).json({ 
+      error: 'Failed to fetch products',
+      details: error.message 
+    });
   }
 });
 

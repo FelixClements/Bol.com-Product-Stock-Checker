@@ -332,19 +332,26 @@
         }
         
         async function fetchProducts() {
-            productsBody.innerHTML = '<tr><td colspan="3">Loading products...</td></tr>';
+            productsBody.innerHTML = '<tr><td colspan="4">Loading products...</td></tr>';
             
             try {
                 const response = await fetch(`${API_BASE_URL}/products`);
                 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch products');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch products');
                 }
                 
                 const products = await response.json();
                 
-                if (products.length === 0) {
-                    productsBody.innerHTML = '<tr><td colspan="3">No products found</td></tr>';
+                // Handle empty products array gracefully
+                if (!products || products.length === 0) {
+                    productsBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="text-center p-4">
+                                No products found. Add your first product URL above!
+                            </td>
+                        </tr>`;
                     return;
                 }
                 
@@ -374,7 +381,12 @@
                 productsBody.innerHTML = tableHtml;
                 
             } catch (error) {
-                productsBody.innerHTML = `<tr><td colspan="3">Error loading products: ${error.message}</td></tr>`;
+                productsBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center p-4 text-red-500">
+                            Unable to load products. Please try again later.
+                        </td>
+                    </tr>`;
                 console.error('Error:', error);
             }
         }
