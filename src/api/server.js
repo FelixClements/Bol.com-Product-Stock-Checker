@@ -12,19 +12,26 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.API_PORT || 3000;
 
+// Configure CORS based on environment
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production'
+    ? false  // Disable CORS in production since we're serving frontend from same origin
+    : 'http://localhost:3000'  // Allow localhost in development
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Add this before your routes
+// Serve static files before API routes
 app.use(express.static(path.join(__dirname, '../../public')));
 
-// Add a route to serve the HTML file
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../public/index.html'));
-  });
+// API routes
+app.use('/api', (req, res, next) => {
+  logger.info(`API Request: ${req.method} ${req.path}`);
+  next();
+});
 
-// Routes
 app.post('/api/products', async (req, res) => {
   try {
     const { url } = req.body;
@@ -80,11 +87,16 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
+// Catch-all route to serve index.html for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../public/index.html'));
+});
+
 // Start the server
 export function startApiServer() {
   return new Promise((resolve) => {
     const server = app.listen(PORT, () => {
-      logger.info(`API server running on port ${PORT}`);
+      logger.info(`API server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
       resolve(server);
     });
   });
