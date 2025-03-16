@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { checkStock } from '../services/stockChecker.js';
 import { Product } from '../models/products.js';
 import { logger } from '../utils/logger.js';
 
@@ -89,6 +90,42 @@ app.delete('/api/products/:id', async (req, res) => {
   } catch (error) {
     logger.error('Error deleting product:', error);
     return res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
+app.post('/api/products/:id/check', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    
+    // Get the product from the database
+    const product = await Product.getProductById(productId);
+    
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    // Run the stock check
+    logger.info(`Manual stock check triggered for product ID: ${productId}`);
+    const stock = await checkStock(product.url);
+    
+    // Update the database
+    await Product.addStockHistory(productId, stock);
+    await Product.updateLastChecked(productId);
+    
+    logger.info(`Manual stock check completed for product ID: ${productId}, stock: ${stock}`);
+    
+    return res.json({ 
+      message: 'Stock check completed successfully',
+      product: productId,
+      stock: stock
+    });
+    
+  } catch (error) {
+    logger.error('Error running manual stock check:', error);
+    return res.status(500).json({ 
+      error: 'Failed to run stock check',
+      details: error.message 
+    });
   }
 });
 

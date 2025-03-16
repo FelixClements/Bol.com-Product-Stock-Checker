@@ -198,6 +198,24 @@
             text-decoration: underline;
             color: #2980b9;
         }
+        .check-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .check-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .check-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -369,6 +387,11 @@
                             <td>${product.scheduled_time || 'Not scheduled'}</td>
                             <td>
                                 <button 
+                                    class="check-btn" 
+                                    data-check-id="${product.id}"
+                                    onclick="runStockCheck(${product.id})"
+                                >Run Stock Check</button>
+                                <button 
                                     class="remove-btn" 
                                     data-product-id="${product.id}"
                                     onclick="removeProduct(${product.id})"
@@ -411,6 +434,49 @@
             } catch (error) {
                 showAlert(errorAlert, error.message || 'Error removing product');
                 console.error('Error:', error);
+            }
+        }
+
+        async function runStockCheck(productId) {
+            // Show confirmation dialog
+            if (!confirm('Run stock check for this product now?')) {
+                return;
+            }
+            
+            try {
+                // Show loading indicator
+                const checkButton = document.querySelector(`button[data-check-id="${productId}"]`);
+                const originalText = checkButton.textContent;
+                checkButton.disabled = true;
+                checkButton.innerHTML = `<span>Checking...</span> <div class="loader" style="display: inline-block;"></div>`;
+                
+                // Call the API endpoint
+                const response = await fetch(`${API_BASE_URL}/products/${productId}/check`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to run stock check');
+                }
+                
+                const result = await response.json();
+                
+                // Show success message
+                showAlert(successAlert, `Stock check completed! Current stock: ${result.stock}`);
+                
+                // Refresh the product list to show updated time
+                fetchProducts();
+            } catch (error) {
+                showAlert(errorAlert, error.message || 'Error running stock check');
+                console.error('Error:', error);
+            } finally {
+                // Re-enable button and restore text
+                const checkButton = document.querySelector(`button[data-check-id="${productId}"]`);
+                if (checkButton) {
+                    checkButton.disabled = false;
+                    checkButton.textContent = 'Run Stock Check';
+                }
             }
         }
     </script>
