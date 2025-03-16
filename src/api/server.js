@@ -33,17 +33,24 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+// POST /api/products endpoint with URL truncation logic
 app.post('/api/products', async (req, res) => {
   try {
-    const { url } = req.body;
+    let { url } = req.body;
     
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
     }
     
-    // Validate URL format (basic check)
+    // Basic validation: URL must start with "https://"
     if (!url.startsWith('https://')) {
       return res.status(400).json({ error: 'URL must start with https://' });
+    }
+    
+    // Remove query parameters by splitting on "?" and ensuring a trailing slash
+    url = url.split('?')[0];
+    if (!url.endsWith('/')) {
+      url += '/';
     }
     
     const newProduct = await Product.addProduct(url);
