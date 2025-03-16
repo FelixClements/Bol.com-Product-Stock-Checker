@@ -1,7 +1,7 @@
 // src/services/scheduler.js
 import { Product } from '../models/products.js';
 import { logger } from '../utils/logger.js';
-import { checkStock } from './stockChecker.js';
+import { checkStockAndCalculateSales } from './stockChecker.js';
 
 export class Scheduler {
   constructor() {
@@ -42,7 +42,7 @@ export class Scheduler {
       
       for (const product of products) {
         try {
-          const stock = await checkStock(product.url);
+          const stock = await checkStockAndCalculateSales(product.url, product.id);
           await Product.addStockHistory(product.id, stock);
           await Product.updateLastChecked(product.id);
           logger.info(`Updated stock for product ${product.id}: ${stock}`);
@@ -79,7 +79,7 @@ export class Scheduler {
           // Process each product one by one
           for (const product of products) {
             try {
-              const stock = await checkStock(product.url);
+              const stock = await checkStockAndCalculateSales(product.url, product.id);
               await Product.addStockHistory(product.id, stock);
               await Product.updateLastChecked(product.id);
               logger.info(`Updated stock for product ${product.id}: ${stock}`);

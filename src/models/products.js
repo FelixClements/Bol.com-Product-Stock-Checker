@@ -158,5 +158,31 @@ export class Product {
     } catch (error) {
         throw new Error(`Failed to delete product: ${error.message}`);
     }
-}
+  }
+
+  // Add this method to the Product class
+  static async getSalesData(productId, startDate = null, endDate = null) {
+    let query = `
+      SELECT * FROM products_sales
+      WHERE product_id = $1
+    `;
+    
+    const params = [productId];
+    
+    if (startDate) {
+      query += ` AND period_end >= $${params.length + 1}`;
+      params.push(startDate);
+    }
+    
+    if (endDate) {
+      query += ` AND period_start <= $${params.length + 1}`;
+      params.push(endDate);
+    }
+    
+    query += ` ORDER BY period_end DESC`;
+    
+    const { rows } = await pool.query(query, params);
+    return rows;
+  }
+
 }
