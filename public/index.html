@@ -319,13 +319,7 @@
                 showAlert(errorAlert, 'URL must start with https://');
                 return;
             }
-
-            // Clean the URL by removing everything after the question mark
-            const questionMarkIndex = url.indexOf('?');
-            if (questionMarkIndex !== -1) {
-                url = url.substring(0, questionMarkIndex);
-            }
-            
+         
             showLoader();
             
             try {
