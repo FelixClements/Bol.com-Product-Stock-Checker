@@ -8,7 +8,7 @@
     "start": "node src/app.js",
     "debug": "node --inspect-brk src/app.js"
   },
-  "author": "Maart",
+  "author": "FelixClements",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
