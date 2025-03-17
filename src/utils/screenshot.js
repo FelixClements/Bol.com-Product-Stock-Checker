@@ -2,6 +2,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import { logger } from './logger.js'; // Import logger
 
 class ScreenshotManager {
   constructor() {
