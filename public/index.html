@@ -334,7 +334,12 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Failed to add URL');
+                    //  Check for specific error and show it
+                    if(data.error === 'URL already exists'){
+                        throw new Error(data.error);
+                    } else {
+                        throw new Error(data.error || 'Failed to add URL');
+                    }
                 }
                 
                 showAlert(successAlert, 'URL added successfully!');

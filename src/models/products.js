@@ -185,4 +185,14 @@ export class Product {
     return rows;
   }
 
+  // Check if the product already exists
+  static async getProductByUrl(url) {
+    const query = `
+      SELECT *
+      FROM products
+      WHERE url = $1
+    `;
+    const { rows } = await pool.query(query, [url]);
+    return rows[0]; // Returns undefined if no product with that URL exists
+  }
 }

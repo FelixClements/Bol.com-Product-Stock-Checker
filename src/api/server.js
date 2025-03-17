@@ -1,4 +1,5 @@
 // src/api/server.js
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -51,6 +52,12 @@ app.post('/api/products', async (req, res) => {
     url = url.split('?')[0];
     if (!url.endsWith('/')) {
       url += '/';
+    }
+
+    // Check if the product already exists
+    const existingProduct = await Product.getProductByUrl(url);
+    if (existingProduct) {
+      return res.status(400).json({ error: 'URL already exists' });
     }
     
     const newProduct = await Product.addProduct(url);
