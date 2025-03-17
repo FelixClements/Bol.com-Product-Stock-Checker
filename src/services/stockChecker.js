@@ -56,16 +56,32 @@ export async function checkStock(url, productId = null) {
 
     // Check if the product is available
     try {
-      await page.waitForSelector(STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.selector, { 
-        timeout: STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.timeout 
-      });
-      const productAvailable = await page.$eval(STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.selector, el => el.textContent);
-      if (productAvailable.trim() == 'Ontvang eenmalig een mail of notificatie via de bol app zodra dit artikel weer leverbaar is.') {
-        logger.info('Product is not available');
-        return 0;
+      // Try the first selector - this would indicate the product is NOT available
+      try {
+        const productNotAvailable = await page.waitForSelector(STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.selector, { 
+          timeout: STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.timeout 
+        });
+        const productAvailableText = await productNotAvailable.evaluate(el => el.textContent);
+        if (productAvailableText.trim() == 'Ontvang eenmalig een mail of notificatie via de bol app zodra dit artikel weer leverbaar is.') {
+          logger.info('Product is not available');
+          return 0;
+        }
+      } catch (firstSelectorError) {
+        // First selector not found - this is expected when product IS available
+        // Try the second selector which should be present for available products
+        try {
+          await page.waitForSelector(STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.selector2, { 
+            timeout: STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.timeout 
+          });
+          // If we made it here, the second selector exists, which means the product is available
+          logger.info('Product is available (confirmed via selector2)');
+        } catch (secondSelectorError) {
+          // Both selectors failed - log and continue to see if we can proceed anyway
+          logger.warn('Both availability selectors failed, attempting to continue the process');
+        }
       }
-    }
-    catch (error) {
+    } catch (error) {
+      // This catches any other errors in the overall availability check
       await handleStockCheckerError(
         page, 
         STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.id,

@@ -16,6 +16,7 @@ export const STOCK_CHECKER_STEPS = {
     PRODUCT_AVAILABLE: {
       id: 'product_available',
       selector: 'xpath//html/body/div/main/div/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div[2]/div/text()',
+      selector2: 'xpath//html/body/div[1]/main/div/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/ul/li[1]/text()',
       description: 'Is the product available?',
       timeout: 5000
     },
