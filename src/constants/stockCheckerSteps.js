@@ -13,6 +13,12 @@ export const STOCK_CHECKER_STEPS = {
       description: 'Handle country/language modal',
       timeout: 5000
     },
+    PRODUCT_AVAILABLE: {
+      id: 'product_available',
+      selector: 'xpath//html/body/div/main/div/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div[2]/div/text()',
+      description: 'Is the product available?',
+      timeout: 5000
+    },
     ADD_TO_CART: {
       id: 'add_to_cart',
       selector: 'xpath//html/body/div[1]/main/div/div[1]/div[2]/div[2]/section[1]/div[2]/div[1]/span/a',

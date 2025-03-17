@@ -54,6 +54,26 @@ export async function checkStock(url, productId = null) {
       );
     }
 
+    // Check if the product is available
+    try {
+      await page.waitForSelector(STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.selector, { 
+        timeout: STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.timeout 
+      });
+      const productAvailable = await page.$eval(STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.selector, el => el.textContent);
+      if (productAvailable.trim() == 'Ontvang eenmalig een mail of notificatie via de bol app zodra dit artikel weer leverbaar is.') {
+        logger.info('Product is not available');
+        return 0;
+      }
+    }
+    catch (error) {
+      await handleStockCheckerError(
+        page, 
+        STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.id,
+        error, 
+        `Failed to ${STOCK_CHECKER_STEPS.PRODUCT_AVAILABLE.description}`
+      );
+    }
+
     // Add to cart
     try {
       // Try the first selector
