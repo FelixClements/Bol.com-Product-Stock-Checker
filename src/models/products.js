@@ -28,7 +28,7 @@ export class Product {
       SELECT id, url 
       FROM products 
       WHERE 
-        (last_checked IS NULL OR last_checked < NOW() - INTERVAL '1 day')
+        (last_checked IS NULL OR last_checked < NOW()::date)
         AND scheduled_time::time <= CURRENT_TIME
         AND NOT checked_today
     `;
