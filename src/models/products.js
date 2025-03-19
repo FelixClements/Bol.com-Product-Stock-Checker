@@ -3,8 +3,9 @@
 import pool from '../config/database.js';
 
 export class Product {
+  // Update the getAllProducts method to include last_check_successful
   static async getAllProducts() {
-    const query = `SELECT id, url, scheduled_time FROM products`;
+    const query = `SELECT id, url, scheduled_time, last_check_successful FROM products`;
     const { rows } = await pool.query(query);
     return rows;
   }
@@ -37,15 +38,17 @@ export class Product {
     return rows;
   }
 
-  static async updateLastChecked(productId) {
+  // Update updateLastChecked to include the success parameter
+  static async updateLastChecked(productId, successful = true) {
     const query = `
       UPDATE products 
       SET last_checked = NOW(),
-          checked_today = TRUE
+          checked_today = TRUE,
+          last_check_successful = $2
       WHERE id = $1
     `;
     
-    await pool.query(query, [productId]);
+    await pool.query(query, [productId, successful]);
   }
 
   static async resetDailyChecks() {
@@ -241,4 +244,34 @@ export class Product {
     const { rows } = await pool.query(query, [url]);
     return rows[0]; // Returns undefined if no product with that URL exists
   }
+
+  // New method to get products with their 30-day sales data
+  static async getAllProductsWithSales() {
+    const query = `
+      WITH last_30_day_sales AS (
+        SELECT 
+          product_id,
+          SUM(sales_quantity) as total_sales
+        FROM 
+          products_sales
+        WHERE 
+          period_end >= NOW() - INTERVAL '30 days'
+        GROUP BY 
+          product_id
+      )
+      SELECT 
+        p.id, 
+        p.url, 
+        p.scheduled_time, 
+        p.last_check_successful,
+        COALESCE(s.total_sales, 0) as sales_30_days
+      FROM 
+        products p
+      LEFT JOIN 
+        last_30_day_sales s ON p.id = s.product_id
+    `;
+    const { rows } = await pool.query(query);
+    return rows;
+  }
+
 }

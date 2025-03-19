@@ -15,7 +15,8 @@ const tables = {
       url TEXT NOT NULL,
       last_checked TIMESTAMP,
       scheduled_time TIME,
-      checked_today BOOLEAN DEFAULT FALSE
+      checked_today BOOLEAN DEFAULT FALSE,
+      last_check_successful BOOLEAN DEFAULT TRUE
     )
   `,
   products_history: `

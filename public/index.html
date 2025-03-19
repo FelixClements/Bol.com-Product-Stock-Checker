@@ -38,12 +38,35 @@
         
         header {
             margin-bottom: 30px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         h1 {
             color: var(--primary);
             margin-bottom: 10px;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-link {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .nav-link:hover {
+            background-color: #2980b9;
         }
         
         .form-container {
@@ -183,6 +206,22 @@
             .truncate {
                 max-width: 200px;
             }
+            
+            header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .header-right {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
         }
 
         .truncate a {
@@ -198,6 +237,13 @@
             text-decoration: underline;
             color: #2980b9;
         }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
         .check-btn {
             background-color: var(--success);
             color: white;
@@ -205,7 +251,6 @@
             padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
-            margin-left: 5px;
         }
 
         .check-btn:hover {
@@ -216,13 +261,51 @@
             background-color: #95a5a6;
             cursor: not-allowed;
         }
+        
+        .view-sales-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        .view-sales-btn:hover {
+            background-color: #e67e22;
+        }
+
+        .status-indicator {
+                display: inline-block;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            .status-success {
+                background-color: #d4edda;
+                color: #155724;
+            }
+            .status-failed {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+            .sales-count {
+                font-weight: bold;
+                color: #2c3e50;
+            }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Stock Checker URL Manager</h1>
-            <p>Add and manage product URLs for stock checking</p>
+            <div class="header-right">
+                <a href="/sales.html" class="nav-link">View Sales Dashboard</a>
+            </div>
         </header>
         
         <div class="form-container">
@@ -254,12 +337,14 @@
                         <th>ID</th>
                         <th>URL</th>
                         <th>Scheduled Time</th>
+                        <th>Last 30 Days Sales</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="products-body">
                     <tr>
-                        <td colspan="3">Loading products...</td>
+                        <td colspan="6">Loading products...</td>
                     </tr>
                 </tbody>
             </table>
@@ -354,8 +439,9 @@
             }
         }
         
+    // Update the fetchProducts function in your existing script
         async function fetchProducts() {
-            productsBody.innerHTML = '<tr><td colspan="4">Loading products...</td></tr>';
+            productsBody.innerHTML = '<tr><td colspan="6">Loading products...</td></tr>';
             
             try {
                 const response = await fetch(`${API_BASE_URL}/products`);
@@ -371,7 +457,7 @@
                 if (!products || products.length === 0) {
                     productsBody.innerHTML = `
                         <tr>
-                            <td colspan="4" class="text-center p-4">
+                            <td colspan="6" class="text-center p-4">
                                 No products found. Add your first product URL above!
                             </td>
                         </tr>`;
@@ -381,6 +467,14 @@
                 let tableHtml = '';
                 
                 products.forEach(product => {
+                    // Create status indicator based on last_check_successful
+                    const statusHtml = product.last_check_successful !== false
+                        ? `<span class="status-indicator status-success">Success</span>`
+                        : `<span class="status-indicator status-failed">Failed</span>`;
+                    
+                    // Format sales data
+                    const salesHtml = `<span class="sales-count">${product.sales_30_days || 0}</span> units`;
+                    
                     tableHtml += `
                         <tr>
                             <td>${product.id}</td>
@@ -390,17 +484,25 @@
                                 </a>
                             </td>
                             <td>${product.scheduled_time || 'Not scheduled'}</td>
+                            <td>${salesHtml}</td>
+                            <td>${statusHtml}</td>
                             <td>
-                                <button 
-                                    class="check-btn" 
-                                    data-check-id="${product.id}"
-                                    onclick="runStockCheck(${product.id})"
-                                >Run Stock Check</button>
-                                <button 
-                                    class="remove-btn" 
-                                    data-product-id="${product.id}"
-                                    onclick="removeProduct(${product.id})"
-                                >Remove</button>
+                                <div class="action-buttons">
+                                    <button 
+                                        class="check-btn" 
+                                        data-check-id="${product.id}"
+                                        onclick="runStockCheck(${product.id})"
+                                    >Run Stock Check</button>
+                                    <a 
+                                        href="/sales.html?product=${product.id}" 
+                                        class="view-sales-btn"
+                                    >View Sales</a>
+                                    <button 
+                                        class="remove-btn" 
+                                        data-product-id="${product.id}"
+                                        onclick="removeProduct(${product.id})"
+                                    >Remove</button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -411,7 +513,7 @@
             } catch (error) {
                 productsBody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="text-center p-4 text-red-500">
+                        <td colspan="6" class="text-center p-4 text-red-500">
                             Unable to load products. Please try again later.
                         </td>
                     </tr>`;
@@ -467,10 +569,14 @@
                 
                 const result = await response.json();
                 
-                // Show success message
-                showAlert(successAlert, `Stock check completed! Current stock: ${result.stock}`);
+                // Show success/failure message
+                if (result.successful) {
+                    showAlert(successAlert, `Stock check completed successfully! Current stock: ${result.stock}`);
+                } else {
+                    showAlert(errorAlert, `Stock check completed with errors. Using default stock: ${result.stock}`);
+                }
                 
-                // Refresh the product list to show updated time
+                // Refresh the product list to show updated time and status
                 fetchProducts();
             } catch (error) {
                 showAlert(errorAlert, error.message || 'Error running stock check');

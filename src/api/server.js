@@ -74,9 +74,10 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
+// Update GET /api/products to include the last_check_successful and 30-day sales
 app.get('/api/products', async (req, res) => {
   try {
-    const products = await Product.getAllProducts();
+    const products = await Product.getAllProductsWithSales();
     // Return an empty array instead of potentially undefined
     return res.json(products || []);
   } catch (error) {
@@ -121,19 +122,29 @@ app.post('/api/products/:id/check', async (req, res) => {
     
     // Run the stock check
     logger.info(`Manual stock check triggered for product ID: ${productId}`);
-    const stock = await checkStock(product.url);
+    let stock;
+    let successful = true;
     
-    // Update the database
+    try {
+      stock = await checkStock(product.url);
+    } catch (error) {
+      successful = false;
+      logger.error(`Stock check failed for product ID: ${productId}:`, error);
+      stock = 0; // Default to 0 stock if check fails
+    }
+    
+    // Update the database with stock and status
     await Product.addStockHistory(productId, stock);
-    await Product.updateLastChecked(productId);
+    await Product.updateLastChecked(productId, successful);
     await calculateProductSales(product.id);
     
-    logger.info(`Manual stock check completed for product ID: ${productId}, stock: ${stock}`);
+    logger.info(`Manual stock check completed for product ID: ${productId}, stock: ${stock}, successful: ${successful}`);
     
     return res.json({ 
       message: 'Stock check completed successfully',
       product: productId,
-      stock: stock
+      stock: stock,
+      successful: successful
     });
     
   } catch (error) {

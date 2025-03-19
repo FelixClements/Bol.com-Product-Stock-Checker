@@ -61,7 +61,6 @@ export class Scheduler {
 
   async scheduleNextCheck() {
     if (!this.isRunning || !this.isProductionMode) return;
-    
     try {
       // Check if it's a new day (midnight) to reset checked_today flags
       const now = new Date();
@@ -74,34 +73,38 @@ export class Scheduler {
       if (now.getHours() >= 8 && now.getHours() <= 23) {
         // Get products that are due for checking at the current time
         const products = await Product.getProductsDueForCheck();
-        
         if (products.length > 0) {
           logger.info(`Checking ${products.length} products scheduled for now`);
           
           // Process each product one by one
           for (const product of products) {
-            try {
-              const stock = await checkStock(product.url, product.id);
+              let stock = 0;
+              let successful = true;
+              
+              try {
+                  stock = await checkStock(product.url, product.id);
+              } catch (error) {
+                  successful = false;
+                  logger.error(`Error checking stock for product ${product.id}:`, error);
+              }
+              
               await Product.addStockHistory(product.id, stock);
-              await Product.updateLastChecked(product.id);
+              await Product.updateLastChecked(product.id, successful);
               await calculateProductSales(product.id);
-              logger.info(`Updated sales and stock for product ${product.id}: ${stock}`);
-            } catch (error) {
-              logger.error(`Error checking stock for product ${product.id}:`, error);
-            }
-            
-            // Add a small delay between product checks to avoid overwhelming the system
-            await new Promise(resolve => setTimeout(resolve, 5000));
+              logger.info(`Updated sales and stock for product ${product.id}: ${stock}, successful: ${successful}`);
+              
+              // Add a small delay between product checks to avoid overwhelming the system
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            } 
           }
         }
-      }
-    } catch (error) {
+  } catch (error) {
       logger.error('Scheduler error:', error);
-    }
-    
-    // Schedule the next check in 1 minute
-    setTimeout(() => this.scheduleNextCheck(), 60000);
   }
+  
+  // Schedule the next check in 1 minute
+  setTimeout(() => this.scheduleNextCheck(), 60000);
+}
 
   stop() {
     this.isRunning = false;
