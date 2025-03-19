@@ -4,6 +4,7 @@ import { logger } from './logger.js';
 
 export async function calculateProductSales(productId) {
   const client = await pool.connect();
+  await new Promise(resolve => setTimeout(resolve, 1000));
   try {
     await client.query('BEGIN');
     await client.query('CALL calculate_product_sales($1)', [productId]);
