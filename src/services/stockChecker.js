@@ -2,7 +2,6 @@
 import puppeteer from 'puppeteer';
 import { handleStockCheckerError } from '../utils/errorHandler.js';
 import { STOCK_CHECKER_STEPS } from '../constants/stockCheckerSteps.js';
-import { calculateProductSales } from '../utils/salesCalculator.js';
 import { logger } from '../utils/logger.js';
 
 export async function checkStock(url, productId = null) {
@@ -186,24 +185,5 @@ export async function checkStock(url, productId = null) {
     if (browser) {
       await browser.close();
     }
-  }
-}
-
-// New function that combines checking stock and calculating sales
-export async function checkStockAndCalculateSales(url, productId) {
-  try {
-    // Check the stock
-    const stock = await checkStock(url);
-    
-    if (stock !== undefined && productId) {
-      // Calculate sales after a successful stock check
-      await calculateProductSales(productId);
-      logger.info(`Stock check and sales calculation completed for product ID: ${productId}`);
-    }
-    
-    return stock;
-  } catch (error) {
-    logger.error(`Error in checkStockAndCalculateSales for product ID: ${productId}:`, error);
-    throw error;
   }
 }

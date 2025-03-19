@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { calculateProductSales } from '../utils/salesCalculator.js';
 import { checkStock } from '../services/stockChecker.js';
 import { Product } from '../models/products.js';
 import { logger } from '../utils/logger.js';
@@ -125,6 +126,7 @@ app.post('/api/products/:id/check', async (req, res) => {
     // Update the database
     await Product.addStockHistory(productId, stock);
     await Product.updateLastChecked(productId);
+    await calculateProductSales(product.id);
     
     logger.info(`Manual stock check completed for product ID: ${productId}, stock: ${stock}`);
     
