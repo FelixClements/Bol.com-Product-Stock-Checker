@@ -160,7 +160,6 @@ export class Product {
     }
   }
 
-  // Add this method to the Product class
   static async getSalesData(productId, startDate = null, endDate = null) {
     let query = `
       SELECT * FROM products_sales
@@ -183,6 +182,53 @@ export class Product {
     
     const { rows } = await pool.query(query, params);
     return rows;
+  }
+
+  static async getProductSalesByPeriod(productId) {
+    try {
+      // Current date for calculating periods
+      const currentDate = new Date();
+      
+      // Calculate dates for 30, 60, and 90 days ago
+      const date30DaysAgo = new Date(currentDate);
+      date30DaysAgo.setDate(currentDate.getDate() - 30);
+      
+      const date60DaysAgo = new Date(currentDate);
+      date60DaysAgo.setDate(currentDate.getDate() - 60);
+      
+      const date90DaysAgo = new Date(currentDate);
+      date90DaysAgo.setDate(currentDate.getDate() - 90);
+      
+      // Format dates for PostgreSQL
+      const formatDate = (date) => date.toISOString();
+      
+      // Query to calculate sales for each period
+      const query = `
+        SELECT
+          SUM(CASE WHEN period_end >= $2 THEN sales_quantity ELSE 0 END) AS sales_30_days,
+          SUM(CASE WHEN period_end >= $3 THEN sales_quantity ELSE 0 END) AS sales_60_days,
+          SUM(CASE WHEN period_end >= $4 THEN sales_quantity ELSE 0 END) AS sales_90_days
+        FROM products_sales
+        WHERE product_id = $1
+      `;
+      
+      const { rows } = await pool.query(query, [
+        productId,
+        formatDate(date30DaysAgo),
+        formatDate(date60DaysAgo),
+        formatDate(date90DaysAgo)
+      ]);
+      
+      // Return the aggregated sales data, defaulting to 0 if null
+      return {
+        productId: parseInt(productId),
+        sales30Days: parseInt(rows[0].sales_30_days || 0),
+        sales60Days: parseInt(rows[0].sales_60_days || 0),
+        sales90Days: parseInt(rows[0].sales_90_days || 0)
+      };
+    } catch (error) {
+      throw new Error(`Failed to get product sales data: ${error.message}`);
+    }
   }
 
   // Check if the product already exists

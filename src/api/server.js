@@ -145,6 +145,34 @@ app.post('/api/products/:id/check', async (req, res) => {
   }
 });
 
+app.get('/api/products/:id/sales', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    
+    // Validate product ID
+    if (!productId || isNaN(parseInt(productId))) {
+      return res.status(400).json({ error: 'Invalid product ID' });
+    }
+    
+    // Check if product exists
+    const product = await Product.getProductById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    // Get sales data for the product
+    const salesData = await Product.getProductSalesByPeriod(productId);
+    
+    return res.json(salesData);
+  } catch (error) {
+    logger.error('Error fetching product sales data:', error);
+    return res.status(500).json({ 
+      error: 'Failed to fetch product sales data',
+      details: error.message 
+    });
+  }
+});
+
 // Catch-all route to serve index.html for client-side routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/index.html'));
