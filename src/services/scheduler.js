@@ -71,7 +71,7 @@ export class Scheduler {
       }
       
       // Only process products between 8AM and 11PM
-      if (now.getHours() >= 8 && now.getHours() < 23) {
+      if (now.getHours() >= 8 && now.getHours() <= 23) {
         // Get products that are due for checking at the current time
         const products = await Product.getProductsDueForCheck();
         
