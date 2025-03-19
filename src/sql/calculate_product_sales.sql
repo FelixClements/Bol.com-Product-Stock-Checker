@@ -51,8 +51,5 @@ BEGIN
       EXIT;
     END IF;
   END LOOP;
-  
-  -- Commit the transaction
-  COMMIT;
 END;
 $$;
