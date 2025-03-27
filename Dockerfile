@@ -7,8 +7,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     chromium \
     --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /usr/src/app/logs/screenshots
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory and set proper permissions
