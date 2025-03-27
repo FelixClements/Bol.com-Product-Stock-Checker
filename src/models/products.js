@@ -142,6 +142,12 @@ export class Product {
                 'DELETE FROM products_history WHERE product_id = $1',
                 [productId]
             );
+            
+            // Delete related records from products_sales
+            await client.query(
+              'DELETE FROM products_sales WHERE product_id = $1',
+              [productId]
+            );
 
             // Then delete the product
             const result = await client.query(

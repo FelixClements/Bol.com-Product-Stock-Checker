@@ -1,5 +1,5 @@
 FROM node:18-slim
-
+ 
 # Install Chrome dependencies
 RUN apt-get update && apt-get install -y \
     wget \
@@ -9,12 +9,18 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /usr/src/app/logs/screenshots
+    && rm -rf /var/lib/apt/lists/*
 
 # Create app directory and set proper permissions
 WORKDIR /usr/src/app
 
 # Copy package files
 COPY package*.json ./
+
+# Create log directories and set ownership *before* installing npm packages
+# and *before* switching user, ensuring node user can write here.
+RUN mkdir -p /usr/src/app/logs/screenshots && \
+    chown -R node:node /usr/src/app/logs
 
 # Install dependencies
 RUN npm ci --only=production
@@ -23,13 +29,14 @@ RUN npm ci --only=production
 COPY . .
 
 # Set up log forwarding in production only
+# This creates symlinks, doesn't affect directory permissions.
 RUN if [ "$NODE_ENV" = "production" ]; then \
         mkdir -p /usr/src/app/logs && \
         ln -sf /dev/stdout /usr/src/app/logs/combined.log && \
         ln -sf /dev/stderr /usr/src/app/logs/error.log; \
     fi
 
-# Create volume for logs and screenshots (only used in development)
+# Declare the logs directory as a potential volume mount point.
 VOLUME ["/usr/src/app/logs"]
 
 # Set non-root user
