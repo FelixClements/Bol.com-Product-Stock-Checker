@@ -184,6 +184,83 @@ app.get('/api/products/:id/sales', async (req, res) => {
   }
 });
 
+// GET /api/products/:id/stockhistory
+app.get('/api/products/:id/stockhistory', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    // Validate product existence if needed:
+    const product = await Product.getProductById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    const history = await Product.getStockHistory(productId);
+    return res.json(history);
+  } catch (error) {
+    logger.error('Error fetching stock history:', error);
+    return res.status(500).json({ error: 'Failed to fetch stock history', details: error.message });
+  }
+});
+
+// DELETE /api/stockhistory/:stockhistoryid
+app.delete('/api/stockhistory/:stockhistoryid', async (req, res) => {
+  try {
+    const stockHistoryId = req.params.stockhistoryid;
+    const deleteResult = await Product.deleteStockHistory(stockHistoryId);
+
+    if (deleteResult.rows === 0) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
+    logger.info(`Deleted stock history record with ID: ${stockHistoryId}`);
+    return res.json({ message: 'Stock history record deleted successfully' });
+  } catch (error) {
+    logger.error('Error deleting stock history record:', error);
+    return res.status(500).json({ error: 'Failed to delete stock history record', details: error.message });
+  }
+});
+
+// PUT /api/stockhistory/:stockhistoryid – update an existing stock history record (for manual change)
+app.put('/api/stockhistory/:stockhistoryid', async (req, res) => {
+  try {
+    const stockHistoryId = req.params.stockhistoryid;
+    const { stock } = req.body;
+    if (isNaN(stock)) {
+      return res.status(400).json({ error: 'Invalid stock value' });
+    }
+
+    const updateResult = await Product.updateStockHistory(stockHistoryId, stock);
+
+    if (updateResult.rows === 0) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
+    logger.info(`Updated stock history record with ID: ${stockHistoryId}`);
+    return res.json({ message: 'Stock history record updated successfully', updated: updateResult.rows[0] });
+  } catch (error) {
+    logger.error('Error updating stock history record:', error);
+    return res.status(500).json({ error: 'Failed to update stock history record', details: error.message });
+  }
+});
+
+// POST /api/products/:id/recalculatesales
+app.post('/api/products/:id/recalculatesales', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    // Validate existence of the product.
+    const product = await Product.getProductById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    const success = await calculateProductSales(productId);
+    if (!success) {
+      return res.status(500).json({ error: 'Sales recalculation failed' });
+    }
+    logger.info(`Sales recalculation triggered for product ID: ${productId}`);
+    return res.json({ message: 'Sales recalculation completed successfully' });
+  } catch (error) {
+    logger.error('Error recalculating sales:', error);
+    return res.status(500).json({ error: 'Failed to recalculate sales', details: error.message });
+  }
+});
+
 // Catch-all route to serve index.html for client-side routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/index.html'));

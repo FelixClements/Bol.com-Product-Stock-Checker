@@ -346,328 +346,519 @@
                 flex-direction: column;
             }
         }
+        #period-buttons {
+        margin-bottom: 15px;
+        }
+        #period-buttons button {
+        margin-right: 5px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        background-color: var(--primary);
+        color: white;
+        cursor: pointer;
+        }
+        #period-buttons button.active {
+        background-color: var(--chart-orange);
+        }
+        #stock-history-section {
+        margin-top: 30px;
+        }
+        #stock-history-table {
+        width: 100%;
+        border-collapse: collapse;
+        }
+        #stock-history-table th, #stock-history-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        }
+        #stock-history-table button {
+        margin-right: 5px;
+        padding: 5px 8px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        }
+        #recalculate-sales-btn {
+        margin-top: 15px;
+        padding: 8px 12px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        }
+        /* Optional: style for an inline editing input */
+        .edit-input {
+        width: 70px;
+        padding: 2px 4px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Product Sales Dashboard</h1>
-            <a href="/" class="nav-link">Back to Products</a>
+        <h1>Product Sales Dashboard</h1>
+        <a href="/" class="nav-link">Back to Products</a>
         </header>
         
         <div id="error-alert" class="alert alert-danger">
-            Error loading sales data. Please try again.
+        Error loading sales data. Please try again.
         </div>
         
         <div class="dashboard-header">
-            <div class="select-container">
-                <select id="product-selector">
-                    <option value="">Select a product...</option>
-                </select>
-            </div>
+        <div class="select-container">
+            <select id="product-selector">
+            <option value="">Select a product...</option>
+            </select>
+        </div>
+        <!-- New period filter buttons -->
+        <div id="period-buttons">
+            <button class="period-btn active" data-days="30">30 Days</button>
+            <button class="period-btn" data-days="60">60 Days</button>
+            <button class="period-btn" data-days="90">90 Days</button>
+        </div>
         </div>
         
         <div id="loading-container" class="loader-container">
-            <div class="loader"></div>
+        <div class="loader"></div>
         </div>
         
         <div id="product-container" style="display: none;">
-            <div id="product-details" class="product-details">
-                <div class="product-info">
-                    <h2 id="product-id"></h2>
-                    <a id="product-url" href="#" target="_blank" class="product-url"></a>
+        <div id="product-details" class="product-details">
+            <div class="product-info">
+            <h2 id="product-id"></h2>
+            <a id="product-url" href="#" target="_blank" class="product-url"></a>
+            </div>
+        </div>
+        
+        <div class="sales-cards">
+            <div class="sales-card">
+            <div class="card-header">
+                <div class="card-title">30-Day Sales</div>
+                <div class="card-period">Last 30 days</div>
+            </div>
+            <div class="card-data">
+                <div class="data-item">
+                <div class="data-label">Total Units Sold</div>
+                <div id="sales-30-days" class="data-value">0</div>
                 </div>
             </div>
-            
-            <div class="sales-cards">
-                <div class="sales-card">
-                    <div class="card-header">
-                        <div class="card-title">30-Day Sales</div>
-                        <div class="card-period">Last 30 days</div>
-                    </div>
-                    <div class="card-data">
-                        <div class="data-item">
-                            <div class="data-label">Total Units Sold</div>
-                            <div id="sales-30-days" class="data-value">0</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="sales-card">
-                    <div class="card-header">
-                        <div class="card-title">60-Day Sales</div>
-                        <div class="card-period">Last 60 days</div>
-                    </div>
-                    <div class="card-data">
-                        <div class="data-item">
-                            <div class="data-label">Total Units Sold</div>
-                            <div id="sales-60-days" class="data-value">0</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="sales-card">
-                    <div class="card-header">
-                        <div class="card-title">90-Day Sales</div>
-                        <div class="card-period">Last 90 days</div>
-                    </div>
-                    <div class="card-data">
-                        <div class="data-item">
-                            <div class="data-label">Total Units Sold</div>
-                            <div id="sales-90-days" class="data-value">0</div>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <div class="sales-card">
-                <div class="card-header">
-                    <div class="card-title">Sales Comparison</div>
+            <div class="card-header">
+                <div class="card-title">60-Day Sales</div>
+                <div class="card-period">Last 60 days</div>
+            </div>
+            <div class="card-data">
+                <div class="data-item">
+                <div class="data-label">Total Units Sold</div>
+                <div id="sales-60-days" class="data-value">0</div>
                 </div>
-                <div class="data-chart">
-                    <div id="chart-30-days" class="chart-column"></div>
-                    <div id="chart-60-days" class="chart-column"></div>
-                    <div id="chart-90-days" class="chart-column"></div>
-                    <div class="chart-label">30 Days</div>
-                    <div class="chart-label">60 Days</div>
-                    <div class="chart-label">90 Days</div>
+            </div>
+            </div>
+            
+            <div class="sales-card">
+            <div class="card-header">
+                <div class="card-title">90-Day Sales</div>
+                <div class="card-period">Last 90 days</div>
+            </div>
+            <div class="card-data">
+                <div class="data-item">
+                <div class="data-label">Total Units Sold</div>
+                <div id="sales-90-days" class="data-value">0</div>
                 </div>
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color color-30days"></div>
-                        <span>30 Days</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color color-60days"></div>
-                        <span>60 Days</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color color-90days"></div>
-                        <span>90 Days</span>
-                    </div>
-                </div>
+            </div>
             </div>
         </div>
         
+        <div class="sales-card">
+            <div class="card-header">
+            <div class="card-title">Sales Comparison</div>
+            </div>
+            <div class="data-chart">
+            <div id="chart-30-days" class="chart-column"></div>
+            <div id="chart-60-days" class="chart-column"></div>
+            <div id="chart-90-days" class="chart-column"></div>
+            <div class="chart-label">30 Days</div>
+            <div class="chart-label">60 Days</div>
+            <div class="chart-label">90 Days</div>
+            </div>
+            <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color color-30days"></div>
+                <span>30 Days</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-60days"></div>
+                <span>60 Days</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-90days"></div>
+                <span>90 Days</span>
+            </div>
+            </div>
+        </div>
+        
+        <!-- New Recalculate Sales Button -->
+        <button id="recalculate-sales-btn">Recalculate Sales</button>
+        <span id="recalculate-loader" class="loader" style="display:none;"></span>
+        
+        <!-- New Stock History Section -->
+        <div id="stock-history-section">
+            <h2>Stock History</h2>
+            <table id="stock-history-table">
+            <thead>
+                <tr>
+                <th>Date/Time</th>
+                <th>Stock Level</th>
+                <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Stock history rows will be inserted here -->
+            </tbody>
+            </table>
+        </div>
+        
+        </div>
+        
         <div id="no-selection" class="no-products">
-            <p>Select a product to view sales data.</p>
+        <p>Select a product to view sales data.</p>
         </div>
     </div>
-
+    
     <script>
         // Configuration
         const API_BASE_URL = '/api';
-        
+        let currentSalesData = {};  // store fetched sales data globally
+
         // DOM Elements
         const productSelector = document.getElementById('product-selector');
         const errorAlert = document.getElementById('error-alert');
         const loadingContainer = document.getElementById('loading-container');
         const productContainer = document.getElementById('product-container');
         const noSelection = document.getElementById('no-selection');
-        const productId = document.getElementById('product-id');
-        const productUrl = document.getElementById('product-url');
-        const sales30Days = document.getElementById('sales-30-days');
-        const sales60Days = document.getElementById('sales-60-days');
-        const sales90Days = document.getElementById('sales-90-days');
-        const chart30Days = document.getElementById('chart-30-days');
-        const chart60Days = document.getElementById('chart-60-days');
-        const chart90Days = document.getElementById('chart-90-days');
+        const productIdEl = document.getElementById('product-id');
+        const productUrlEl = document.getElementById('product-url');
+        const sales30DaysEl = document.getElementById('sales-30-days');
+        const sales60DaysEl = document.getElementById('sales-60-days');
+        const sales90DaysEl = document.getElementById('sales-90-days');
+        const chart30DaysEl = document.getElementById('chart-30-days');
+        const chart60DaysEl = document.getElementById('chart-60-days');
+        const chart90DaysEl = document.getElementById('chart-90-days');
+        const periodButtons = document.querySelectorAll('.period-btn');
+        const recalcSalesBtn = document.getElementById('recalculate-sales-btn');
+        const recalcLoader = document.getElementById('recalculate-loader');
+        const stockHistoryTableBody = document.querySelector('#stock-history-table tbody');
         
         // Event Listeners
         document.addEventListener('DOMContentLoaded', initialize);
         productSelector.addEventListener('change', handleProductSelection);
         
-        // Functions
-        async function initialize() {
-            try {
-                // Load products for the dropdown
-                await loadProducts();
-                
-                // Check if URL has product ID parameter
-                const urlParams = new URLSearchParams(window.location.search);
-                const productParam = urlParams.get('product');
-                
-                if (productParam) {
-                    productSelector.value = productParam;
-                    await handleProductSelection();
-                } else {
-                    // If no product selected, show the no selection message
-                    showNoSelection();
-                }
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showError('Failed to initialize the dashboard');
-            }
-        }
+        periodButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            periodButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const selectedDays = parseInt(btn.getAttribute('data-days'));
+            updateChartForPeriod(selectedDays);
+        });
+        });
         
+        recalcSalesBtn.addEventListener('click', recalculateSales);
+
+        // Helper functions for alerts and loaders
         function showError(message) {
-            errorAlert.textContent = message;
-            errorAlert.style.display = 'block';
-            setTimeout(() => {
-                errorAlert.style.display = 'none';
-            }, 5000);
+        errorAlert.textContent = message;
+        errorAlert.style.display = 'block';
+        setTimeout(() => errorAlert.style.display = 'none', 5000);
         }
         
         function showLoading() {
-            loadingContainer.style.display = 'flex';
-            productContainer.style.display = 'none';
-            noSelection.style.display = 'none';
+        loadingContainer.style.display = 'flex';
+        productContainer.style.display = 'none';
+        noSelection.style.display = 'none';
         }
         
         function showProductContainer() {
-            loadingContainer.style.display = 'none';
-            productContainer.style.display = 'block';
-            noSelection.style.display = 'none';
+        loadingContainer.style.display = 'none';
+        productContainer.style.display = 'block';
+        noSelection.style.display = 'none';
         }
         
         function showNoSelection() {
-            loadingContainer.style.display = 'none';
-            productContainer.style.display = 'none';
-            noSelection.style.display = 'block';
+        loadingContainer.style.display = 'none';
+        productContainer.style.display = 'none';
+        noSelection.style.display = 'block';
+        }
+        
+        // Initialization function
+        async function initialize() {
+        try {
+            await loadProducts();
+            const urlParams = new URLSearchParams(window.location.search);
+            const productParam = urlParams.get('product');
+            if (productParam) {
+            productSelector.value = productParam;
+            await handleProductSelection();
+            } else {
+            showNoSelection();
+            }
+        } catch (e) {
+            console.error(e);
+            showError('Initialization error.');
+        }
         }
         
         async function loadProducts() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/products`);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch products');
-                }
-                
-                const products = await response.json();
-                
-                if (!products || products.length === 0) {
-                    // No products available
-                    productSelector.innerHTML = '<option value="">No products available</option>';
-                    return;
-                }
-                
-                // Populate the product selector
-                let options = '<option value="">Select a product...</option>';
-                
-                products.forEach(product => {
-                    // Use a shorter display text by truncating the URL
-                    const displayUrl = product.url.length > 50 
-                        ? product.url.substring(0, 47) + '...' 
-                        : product.url;
-                    
-                    options += `<option value="${product.id}">Product ${product.id}: ${displayUrl}</option>`;
-                });
-                
-                productSelector.innerHTML = options;
-                
-            } catch (error) {
-                console.error('Error loading products:', error);
-                showError('Failed to load products. Please refresh the page.');
-                productSelector.innerHTML = '<option value="">Error loading products</option>';
+        try {
+            const res = await fetch(`${API_BASE_URL}/products`);
+            if (!res.ok) throw new Error('Failed to fetch products');
+            const products = await res.json();
+            if (!products || products.length === 0) {
+            productSelector.innerHTML = '<option value="">No products available</option>';
+            return;
             }
+            let options = '<option value="">Select a product...</option>';
+            products.forEach(p => {
+            const displayUrl = p.url.length > 50 ? p.url.substring(0, 47) + '...' : p.url;
+            options += `<option value="${p.id}">Product ${p.id}: ${displayUrl}</option>`;
+            });
+            productSelector.innerHTML = options;
+        } catch (e) {
+            console.error(e);
+            showError('Failed to load products. Please refresh the page.');
+            productSelector.innerHTML = '<option value="">Error loading products</option>';
+        }
         }
         
         async function handleProductSelection() {
-            const selectedProductId = productSelector.value;
-            
-            if (!selectedProductId) {
-                showNoSelection();
-                // Update URL without product parameter
-                history.pushState({}, '', '/sales.html');
-                return;
-            }
-            
-            showLoading();
-            
-            try {
-                // Update URL with selected product
-                history.pushState({}, '', `/sales.html?product=${selectedProductId}`);
-                
-                // Fetch product details and sales data
-                const [productDetails, salesData] = await Promise.all([
-                    fetchProductDetails(selectedProductId),
-                    fetchProductSales(selectedProductId)
-                ]);
-                
-                // Update the UI with the fetched data
-                updateProductDetails(productDetails);
-                updateSalesData(salesData);
-                updateSalesChart(salesData);
-                
-                showProductContainer();
-                
-            } catch (error) {
-                console.error('Error handling product selection:', error);
-                showError('Failed to load product sales data');
-                showNoSelection();
-            }
+        const selectedProdId = productSelector.value;
+        if (!selectedProdId) {
+            showNoSelection();
+            history.pushState({}, '', '/sales.html');
+            return;
+        }
+        showLoading();
+        try {
+            history.pushState({}, '', `/sales.html?product=${selectedProdId}`);
+            const [details, salesData] = await Promise.all([
+            fetchProductDetails(selectedProdId),
+            fetchProductSales(selectedProdId)
+            ]);
+            updateProductDetails(details);
+            updateSalesData(salesData);
+            currentSalesData = salesData; // store for filtering
+            updateSalesChart(salesData);  // initialize full chart view
+            fetchStockHistory(selectedProdId);
+            showProductContainer();
+        } catch (e) {
+            console.error(e);
+            showError('Failed to load product sales data');
+            showNoSelection();
+        }
         }
         
-        async function fetchProductDetails(productId) {
-            const response = await fetch(`${API_BASE_URL}/products`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch product details');
-            }
-            
-            const products = await response.json();
-            const product = products.find(p => p.id == productId);
-            
-            if (!product) {
-                throw new Error('Product not found');
-            }
-            
-            return product;
+        async function fetchProductDetails(prodId) {
+        const res = await fetch(`${API_BASE_URL}/products`);
+        if (!res.ok) throw new Error('Failed to fetch product details');
+        const products = await res.json();
+        const product = products.find(p => p.id == prodId);
+        if (!product) throw new Error('Product not found');
+        return product;
         }
         
-        async function fetchProductSales(productId) {
-            const response = await fetch(`${API_BASE_URL}/products/${productId}/sales`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch sales data');
-            }
-            
-            return await response.json();
+        async function fetchProductSales(prodId) {
+        const res = await fetch(`${API_BASE_URL}/products/${prodId}/sales`);
+        if (!res.ok) throw new Error('Failed to fetch sales data');
+        return await res.json();
+        }
+        
+        async function fetchStockHistory(prodId) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/products/${prodId}/stockhistory`);
+            if (!res.ok) throw new Error('Failed to load stock history');
+            const history = await res.json();
+            populateStockHistoryTable(history);
+        } catch (e) {
+            console.error(e);
+            showError('Failed to load stock history');
+        }
         }
         
         function updateProductDetails(product) {
-            productId.textContent = `Product #${product.id}`;
-            productUrl.textContent = product.url;
-            productUrl.href = product.url;
+        productIdEl.textContent = `Product #${product.id}`;
+        productUrlEl.textContent = product.url;
+        productUrlEl.href = product.url;
         }
         
         function updateSalesData(salesData) {
-            sales30Days.textContent = salesData.sales30Days || 0;
-            sales60Days.textContent = salesData.sales60Days || 0;
-            sales90Days.textContent = salesData.sales90Days || 0;
+        sales30DaysEl.textContent = salesData.sales30Days || 0;
+        sales60DaysEl.textContent = salesData.sales60Days || 0;
+        sales90DaysEl.textContent = salesData.sales90Days || 0;
         }
         
         function updateSalesChart(salesData) {
-            const maxSales = Math.max(
-                salesData.sales30Days || 0,
-                salesData.sales60Days || 0,
-                salesData.sales90Days || 0
-            );
-            
-            // If no sales data, show empty chart
-            if (maxSales === 0) {
-                chart30Days.style.height = '0%';
-                chart60Days.style.height = '0%';
-                chart90Days.style.height = '0%';
-                return;
-            }
-            
-            // Calculate proportional heights for chart columns
-            const height30Days = ((salesData.sales30Days || 0) / maxSales) * 100;
-            const height60Days = ((salesData.sales60Days || 0) / maxSales) * 100;
-            const height90Days = ((salesData.sales90Days || 0) / maxSales) * 100;
-            
-            // Update chart column heights
-            chart30Days.style.height = `${height30Days}%`;
-            chart60Days.style.height = `${height60Days}%`;
-            chart90Days.style.height = `${height90Days}%`;
-            
-            // Add titles showing exact values on hover
-            chart30Days.title = `30 Days: ${salesData.sales30Days || 0} units`;
-            chart60Days.title = `60 Days: ${salesData.sales60Days || 0} units`;
-            chart90Days.title = `90 Days: ${salesData.sales90Days || 0} units`;
+        // Determine maximum sales value among all periods
+        const maxSales = Math.max(
+            salesData.sales30Days || 0,
+            salesData.sales60Days || 0,
+            salesData.sales90Days || 0
+        );
+        if (maxSales === 0) {
+            chart30DaysEl.style.height = chart60DaysEl.style.height = chart90DaysEl.style.height = '0%';
+            return;
         }
+        chart30DaysEl.style.height = `${(salesData.sales30Days / maxSales) * 100}%`;
+        chart60DaysEl.style.height = `${(salesData.sales60Days / maxSales) * 100}%`;
+        chart90DaysEl.style.height = `${(salesData.sales90Days / maxSales) * 100}%`;
+        chart30DaysEl.title = `30 Days: ${salesData.sales30Days || 0} units`;
+        chart60DaysEl.title = `60 Days: ${salesData.sales60Days || 0} units`;
+        chart90DaysEl.title = `90 Days: ${salesData.sales90Days || 0} units`;
+        }
+        
+        // New function: update the chart to display only the selected period
+        function updateChartForPeriod(period) {
+        // Hide all chart columns
+        chart30DaysEl.style.display = 'none';
+        chart60DaysEl.style.display = 'none';
+        chart90DaysEl.style.display = 'none';
+        let value = 0;
+        if (period === 30) {
+            chart30DaysEl.style.display = 'block';
+            value = currentSalesData.sales30Days || 0;
+        } else if (period === 60) {
+            chart60DaysEl.style.display = 'block';
+            value = currentSalesData.sales60Days || 0;
+        } else if (period === 90) {
+            chart90DaysEl.style.display = 'block';
+            value = currentSalesData.sales90Days || 0;
+        }
+        // Set the visible column to full height (for visualization)  
+        document.querySelector('.data-chart').style.height = '200px';
+        document.querySelectorAll('.chart-column').forEach(col => {
+            col.style.height = '0%';
+        });
+        if (period === 30) {
+            chart30DaysEl.style.height = '100%';
+        } else if (period === 60) {
+            chart60DaysEl.style.height = '100%';
+        } else if (period === 90) {
+            chart90DaysEl.style.height = '100%';
+        }
+        }
+        
+        // New function: populate the stock history table
+        function populateStockHistoryTable(history) {
+        let html = '';
+        if (!history || history.length === 0) {
+            html = '<tr><td colspan="3">No stock history available.</td></tr>';
+        } else {
+            history.forEach(record => {
+            // Date formatting: adjust as needed
+            const dateStr = new Date(record.checked_at).toLocaleString();
+            html += `
+                <tr data-record-id="${record.id}">
+                <td>${dateStr}</td>
+                <td class="stock-value">${record.stock}</td>
+                <td>
+                    <button onclick="deleteStockHistory(${record.id})">Delete</button>
+                    <button onclick="editStockHistory(${record.id}, this)">Edit</button>
+                </td>
+                </tr>
+            `;
+            });
+        }
+        stockHistoryTableBody.innerHTML = html;
+        }
+        
+        // Provide global functions so the inline onclick attributes work
+        window.deleteStockHistory = async function(recordId) {
+        if (!confirm('Are you sure you want to delete this stock history record?')) return;
+        try {
+            const res = await fetch(`${API_BASE_URL}/stockhistory/${recordId}`, {
+            method: 'DELETE'
+            });
+            if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Delete failed');
+            }
+            // Refresh stock history after deletion
+            fetchStockHistory(productSelector.value);
+        } catch (e) {
+            console.error(e);
+            showError(e.message);
+        }
+        }
+        
+        window.editStockHistory = function(recordId, btnElement) {
+        // Get the current stock value cell from the same row
+        const row = btnElement.closest('tr');
+        const stockCell = row.querySelector('.stock-value');
+        const currentVal = stockCell.textContent;
+        // Replace text with an input field
+        stockCell.innerHTML = `<input type="number" class="edit-input" value="${currentVal}" />`;
+        // Change the Edit button to Save with an onclick call to updateStockHistory
+        btnElement.textContent = 'Save';
+        btnElement.onclick = function() { updateStockHistory(recordId, btnElement); };
+        }
+        
+        async function updateStockHistory(recordId, btnElement) {
+        const row = btnElement.closest('tr');
+        const input = row.querySelector('.edit-input');
+        const newVal = input.value;
+        try {
+            const res = await fetch(`${API_BASE_URL}/stockhistory/${recordId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stock: newVal })
+            });
+            if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Update failed');
+            }
+            // Restore the cell to plain text and switch Save back to Edit.
+            row.querySelector('.stock-value').textContent = newVal;
+            btnElement.textContent = 'Edit';
+            btnElement.onclick = function() { editStockHistory(recordId, btnElement); };
+        } catch (e) {
+            console.error(e);
+            showError(e.message);
+        }
+        }
+        
+        // New function to recalculate sales data for the product
+        async function recalculateSales() {
+        const prodId = productSelector.value;
+        if (!prodId) return;
+        try {
+            recalcSalesBtn.disabled = true;
+            recalcLoader.style.display = 'inline-block';
+            const res = await fetch(`${API_BASE_URL}/products/${prodId}/recalculatesales`, {
+            method: 'POST'
+            });
+            if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Recalculation failed');
+            }
+            // Refresh sales data and chart after recalculation
+            const salesData = await fetchProductSales(prodId);
+            updateSalesData(salesData);
+            currentSalesData = salesData;
+            // Reapply the active period filter (default back to 30 if none selected)
+            const activeBtn = document.querySelector('.period-btn.active') || document.querySelector('[data-days="30"]');
+            activeBtn.click();
+        } catch (e) {
+            console.error(e);
+            showError(e.message);
+        } finally {
+            recalcSalesBtn.disabled = false;
+            recalcLoader.style.display = 'none';
+        }
+        }
+        
     </script>
 </body>
 </html>

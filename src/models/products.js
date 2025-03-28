@@ -51,6 +51,29 @@ export class Product {
     await pool.query(query, [productId, successful]);
   }
 
+  //update an existing stock history record (for manual change)
+  static async updateStockHistory(stockHistoryId, stock) {
+    const query = `
+      UPDATE products_history 
+      SET stock = $2 
+      WHERE id = $1
+      RETURNING id
+    `;
+    const { rows } = await pool.query(query, [stockHistoryId, stock]);
+    return rows;
+  }
+
+  //delete an existing stock history record
+  static async deleteStockHistory(stockHistoryId) {
+    const query = `
+      DELETE FROM products_history 
+      WHERE id = $1
+      RETURNING id
+    `;
+    const { rows } = await pool.query(query, [stockHistoryId]);
+    return rows;
+  }
+
   static async resetDailyChecks() {
     // Reset checked_today flag at midnight
     const query = `
