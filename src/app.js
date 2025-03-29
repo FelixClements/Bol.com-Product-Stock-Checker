@@ -1,5 +1,6 @@
 // src/app.js
 import { Scheduler } from './services/scheduler.js';
+import pkg from '../package.json' assert { type: 'json' };
 import { logger } from './utils/logger.js';
 import dotenv from 'dotenv';
 import { startApiServer } from './api/server.js';
@@ -10,6 +11,7 @@ dotenv.config();
 
 // Log environment
 logger.info(`Running in ${process.env.NODE_ENV || 'development'} environment`);
+logger.info(`Starting application (version ${pkg.version})...`);
 
 // Initialize application
 async function initialize() {
