@@ -51,5 +51,9 @@ export const STOCK_CHECKER_STEPS = {
       selector: 'xpath//html/body/div/main/wsp-basket-application/div[2]/div[2]/div/div[1]/div[1]/span',
       description: 'Get the stock value from the product page',
       timeout: 5000
-    }
+    },
+    BASKET_URL: {
+      url: 'https://www.bol.com/nl/nl/basket/',
+      timeout: 5000
+    },
 };

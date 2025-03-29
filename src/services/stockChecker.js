@@ -10,7 +10,7 @@ export async function checkStock(url, productId = null) {
     browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: '/usr/bin/chromium'
+      //executablePath: '/usr/bin/chromium'
     });
 
     const page = await browser.newPage();
@@ -115,22 +115,8 @@ export async function checkStock(url, productId = null) {
 
     // Wait after clicking
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
     // Go to cart
-    try {
-      await page.waitForSelector(STOCK_CHECKER_STEPS.GO_TO_CART.selector, {
-        timeout: STOCK_CHECKER_STEPS.GO_TO_CART.timeout
-      });
-      await page.click(STOCK_CHECKER_STEPS.GO_TO_CART.selector);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
-      await handleStockCheckerError(
-        page, 
-        STOCK_CHECKER_STEPS.GO_TO_CART.id,
-        error, 
-        `Failed to ${STOCK_CHECKER_STEPS.GO_TO_CART.description}`
-      );
-    }
+    await page.goto(STOCK_CHECKER_STEPS.BASKET_URL.url, { waitUntil: 'networkidle2' });
 
     // Select meer option
     try {
