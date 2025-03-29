@@ -59,8 +59,8 @@ export class Product {
       WHERE id = $1
       RETURNING id
     `;
-    const { rows } = await pool.query(query, [stockHistoryId, stock]);
-    return rows;
+    const result = await pool.query(query, [stockHistoryId, stock]);
+    return result; // returns the full result object with result.rows
   }
 
   //delete an existing stock history record
