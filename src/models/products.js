@@ -84,6 +84,23 @@ export class Product {
     await pool.query(query);
   }
 
+  static async getDailySales(productId, days = 30) {
+    // This query groups the sales by day (using date_trunc)
+    // and sums the sales_quantity for each day.
+    const query = `
+      SELECT 
+        date_trunc('day', period_end) AS sale_date,
+        SUM(sales_quantity) AS daily_sales
+      FROM products_sales
+      WHERE product_id = $1
+        AND period_end >= CURRENT_DATE - interval '${days} days'
+      GROUP BY sale_date
+      ORDER BY sale_date ASC;
+    `;
+    const { rows } = await pool.query(query, [productId]);
+    return rows;
+  }
+
   static async scheduleProductChecks() {
     // Schedule each product at a random time between 8AM and 11PM
     const products = await this.getAllProducts();

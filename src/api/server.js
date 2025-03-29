@@ -261,6 +261,25 @@ app.post('/api/products/:id/recalculatesales', async (req, res) => {
   }
 });
 
+app.get('/api/products/:id/sales/daily', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const days = parseInt(req.query.days) || 30; // Optionally pass ?days=30, ?days=60 etc.
+    
+    // Check if the product exists
+    const product = await Product.getProductById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    const dailySales = await Product.getDailySales(productId, days);
+    return res.json({ productId, days, dailySales });
+  } catch (error) {
+    logger.error('Error fetching daily sales data:', error);
+    return res.status(500).json({ error: 'Failed to fetch daily sales data' });
+  }
+});
+
 // Catch-all route to serve index.html for client-side routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/index.html'));
